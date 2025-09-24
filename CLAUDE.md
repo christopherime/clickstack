@@ -10,15 +10,15 @@ ClickStack is a complete observability stack built around ClickHouse as the prim
 
 The system consists of 7 containerized services orchestrated by Docker Compose:
 
-- **ClickHouse** (port 8123/9000/9091): Primary time-series database for metrics storage with Prometheus remote write endpoint on port 9091
+- **ClickHouse** (port 8123/9000/9091): Primary time-series database using TimeSeries table engine for native Prometheus remote_write support
 - **MongoDB** (internal): State storage for HyperDX UI
 - **HyperDX UI** (port 8080): Main observability interface and frontend with OpenTelemetry endpoints (4317/4318)
-- **Prometheus** (port 9090): Metrics collection and forwarding to ClickHouse via remote write
+- **Prometheus** (port 9090): Metrics collection with true remote_write integration to ClickHouse
 - **Grafana** (port 3000): Visualization layer with ClickHouse and Prometheus datasources
 - **AlertManager** (port 9093): Alert processing and routing
-- **Node Exporter** (port 9100): System metrics collection
+- **Node Exporter** (port 9100): System metrics collection (WSL2-optimized collectors)
 
-The data flow follows: Node Exporter → Prometheus → ClickHouse ← Grafana/HyperDX.
+The data flow follows: Node Exporter → Prometheus → ClickHouse (TimeSeries) ← Grafana/HyperDX.
 
 ## Configuration Structure
 
@@ -72,8 +72,10 @@ curl -X POST http://localhost:9090/-/reload
 ## Configuration Patterns
 
 - All services use the `clickstack` Docker network for internal communication
-- ClickHouse automatically initializes with `otel` database and OpenTelemetry-compatible tables via `clickhouse/init.sql`
+- ClickHouse automatically initializes with `otel` database and TimeSeries table via `clickhouse/init.sql`
 - ClickHouse provides Prometheus remote write endpoint on port 9091 configured via `clickhouse/prometheus.xml`
+- ClickHouse uses TimeSeries table engine (experimental) for native Prometheus remote_write support
+- Node-exporter configured with WSL2-compatible collectors (netstat/softnet disabled)
 - Grafana has both ClickHouse (default) and Prometheus datasources configured
 - Alert rules are defined in `prometheus/rules.yml` with basic system monitoring
 - Prometheus remote write sends all metrics to ClickHouse for long-term storage
@@ -81,7 +83,42 @@ curl -X POST http://localhost:9090/-/reload
 ## Key Files
 
 - `docker-compose.yaml`: Complete service orchestration and port mappings
-- `clickhouse/init.sql`: ClickHouse database and table initialization
-- `clickhouse/prometheus.xml`: Prometheus remote write endpoint configuration
-- `prometheus/prometheus.yml`: Scrape targets and remote write configuration
+- `clickhouse/init.sql`: ClickHouse database and TimeSeries table initialization (simplified 13-line script)
+- `clickhouse/prometheus.xml`: Prometheus remote write endpoint configuration with proper handler naming
+- `clickhouse/timeseries.xml`: Enables experimental TimeSeries table engine
+- `clickhouse/users.xml`: User authentication with network access permissions
+- `prometheus/prometheus.yml`: Scrape targets and remote write configuration with authentication
 - `grafana/datasources/clickhouse.yml`: ClickHouse datasource connection details
+
+## Troubleshooting
+
+### Common Issues and Fixes
+
+#### TimeSeries Table Issues
+- **Problem**: "Table otel.prometheus does not exist" errors in Prometheus logs
+- **Solution**: Ensure handler names in `clickhouse/prometheus.xml` use unique identifiers (e.g., `<prometheus_write>` not `<write_handler>`)
+- **Verification**: Check table exists with `docker-compose exec clickhouse clickhouse-client -q "SHOW TABLES FROM otel"`
+
+#### Node-exporter Network Statistics Errors
+- **Problem**: "collector failed" errors for netstat/softnet in WSL2/Docker environments
+- **Solution**: Disable problematic collectors with `--no-collector.netstat` and `--no-collector.softnet` flags
+- **Status**: Already configured in docker-compose.yaml
+
+#### ClickHouse Remote Write Authentication
+- **Problem**: "Authentication failed" errors when testing remote_write endpoint
+- **Solution**: Ensure users.xml allows network access from containers (`<ip>0.0.0.0/0</ip>`)
+- **Test**: `curl -u "clickstack_user:PCqt82oOlksMNr9PjDmhLBJOP" http://localhost:9091/api/v1/write`
+
+### Required ClickHouse Settings
+```xml
+<!-- Enable TimeSeries experimental feature -->
+<allow_experimental_time_series_table>1</allow_experimental_time_series_table>
+```
+
+### TimeSeries Table Structure
+The `otel.prometheus` table uses ClickHouse's experimental TimeSeries engine:
+```sql
+CREATE DATABASE IF NOT EXISTS otel;
+SET allow_experimental_time_series_table = 1;
+CREATE TABLE IF NOT EXISTS otel.prometheus ENGINE = TimeSeries;
+```

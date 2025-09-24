@@ -1,0 +1,12 @@
+<clickhouse>
+    <profiles>
+        <default>
+            <allow_experimental_time_series_table>1</allow_experimental_time_series_table>
+        </default>
+    </profiles>
+    <users>
+        <default>
+            <allow_experimental_time_series_table>1</allow_experimental_time_series_table>
+        </default>
+    </users>
+</clickhouse>

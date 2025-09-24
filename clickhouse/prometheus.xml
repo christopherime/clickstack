@@ -2,24 +2,24 @@
     <prometheus>
         <port>9090</port>
         <handlers>
-            <remote_write>
-                <url>/api/v1/write</url>
-                <handler>
-                    <type>remote_write</type>
-                    <database>otel</database>
-                    <table>prometheus_metrics</table>
-                </handler>
-            </remote_write>
-            <metrics>
+            <metrics_handler>
                 <url>/metrics</url>
                 <handler>
                     <type>expose_metrics</type>
                     <metrics>true</metrics>
-                    <asynchronous_metrics>true</asynchronous_metrics>
                     <events>true</events>
-                    <errors>true</errors>
+                    <asynchronous_metrics>true</asynchronous_metrics>
+                    <status_info>true</status_info>
                 </handler>
-            </metrics>
+            </metrics_handler>
+            <prometheus_write>
+                <url>/api/v1/write</url>
+                <handler>
+                    <type>remote_write</type>
+                    <database>otel</database>
+                    <table>prometheus</table>
+                </handler>
+            </prometheus_write>
         </handlers>
     </prometheus>
 </clickhouse>

@@ -1,7 +1,7 @@
 <clickhouse>
     <users>
         <default>
-            <password></password>
+            <password>clickstack123</password>
             <networks>
                 <ip>::/0</ip>
                 <ip>0.0.0.0/0</ip>
