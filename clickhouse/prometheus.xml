@@ -1,9 +1,25 @@
 <clickhouse>
     <prometheus>
         <port>9090</port>
-        <endpoint>/api/v1/write</endpoint>
-        <table>otel.otel_metrics_v2</table>
-        <database>otel</database>
-        <listen_host>0.0.0.0</listen_host>
+        <handlers>
+            <remote_write>
+                <url>/api/v1/write</url>
+                <handler>
+                    <type>remote_write</type>
+                    <database>otel</database>
+                    <table>prometheus_metrics</table>
+                </handler>
+            </remote_write>
+            <metrics>
+                <url>/metrics</url>
+                <handler>
+                    <type>expose_metrics</type>
+                    <metrics>true</metrics>
+                    <asynchronous_metrics>true</asynchronous_metrics>
+                    <events>true</events>
+                    <errors>true</errors>
+                </handler>
+            </metrics>
+        </handlers>
     </prometheus>
 </clickhouse>

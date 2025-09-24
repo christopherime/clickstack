@@ -4,6 +4,7 @@
             <password></password>
             <networks>
                 <ip>::/0</ip>
+                <ip>0.0.0.0/0</ip>
             </networks>
             <profile>default</profile>
             <quota>default</quota>

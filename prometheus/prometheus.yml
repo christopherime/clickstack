@@ -7,17 +7,18 @@ global:
     replica: "01"
 
 # Send metrics to ClickHouse via remote write
-remote_write:
-  - url: "http://clickhouse:9090/api/v1/write"
-    queue_config:
-      capacity: 10000
-      batch_send_deadline: 5s
-      max_samples_per_send: 1000
-      min_backoff: 100ms
-      max_backoff: 30s
-    metadata_config:
-      send: true
-      send_interval: 30s
+# Temporarily disabled until ClickHouse remote write endpoint is properly configured
+# remote_write:
+#   - url: "http://clickhouse:9090/api/v1/write"
+#     queue_config:
+#       capacity: 10000
+#       batch_send_deadline: 5s
+#       max_samples_per_send: 1000
+#       min_backoff: 100ms
+#       max_backoff: 30s
+#     metadata_config:
+#       send: true
+#       send_interval: 30s
 
 # Alerting rules
 rule_files:
