@@ -1,0 +1,9 @@
+<clickhouse>
+    <prometheus>
+        <port>9090</port>
+        <endpoint>/api/v1/write</endpoint>
+        <table>otel.otel_metrics_v2</table>
+        <database>otel</database>
+        <listen_host>0.0.0.0</listen_host>
+    </prometheus>
+</clickhouse>

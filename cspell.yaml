@@ -1,0 +1,13 @@
+---
+version: "0.2"
+language: en
+enabled: true
+files:
+  - "*.md"
+  - "**/*.md"
+words:
+  - alertmanager
+  - clickhouse
+  - clickstack
+  - dashboarding
+  - hyperdx

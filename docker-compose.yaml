@@ -1,0 +1,129 @@
+---
+services:
+  # ClickHouse Database
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.3-alpine
+    container_name: clickhouse
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./clickhouse:/etc/clickhouse-server/config.d
+    environment:
+      CLICKHOUSE_DB: otel
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ""
+    ports:
+      - "8123:8123"  # HTTP interface
+      - "9000:9000"  # Native TCP interface
+      - "9091:9090"  # Prometheus remote write endpoint
+    networks:
+      - clickstack
+
+  # MongoDB for HyperDX UI state
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - clickstack
+
+  # HyperDX UI (ClickStack Frontend)
+  hyperdx-ui:
+    image: docker.hyperdx.io/hyperdx/hyperdx-all-in-one
+    container_name: hyperdx-ui
+    depends_on:
+      - clickhouse
+    environment:
+      # ClickHouse configuration for HyperDX
+      CLICKHOUSE_ENDPOINT: http://clickhouse:8123
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ""
+    ports:
+      - "8080:8080"    # HyperDX WebUI
+      - "4317:4317"    # OpenTelemetry gRPC
+      - "4318:4318"    # OpenTelemetry HTTP
+    networks:
+      - clickstack
+
+  # Prometheus
+  prometheus:
+    image: quay.io/prometheus/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=7d'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    depends_on:
+      - clickhouse
+    ports:
+      - "9090:9090"
+    networks:
+      - clickstack
+
+  # AlertManager
+  alertmanager:
+    image: quay.io/prometheus/alertmanager:latest
+    container_name: alertmanager
+    volumes:
+      - ./alertmanager:/etc/alertmanager
+      - alertmanager_data:/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+      - '--web.external-url=http://localhost:9093'
+    ports:
+      - "9093:9093"
+    networks:
+      - clickstack
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana:/etc/grafana/provisioning
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: false
+      GF_INSTALL_PLUGINS: grafana-clickhouse-datasource
+    depends_on:
+      - clickhouse
+    ports:
+      - "3000:3000"
+    networks:
+      - clickstack
+
+  # Node Exporter for sample metrics
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node-exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - "9100:9100"
+    networks:
+      - clickstack
+
+volumes:
+  clickhouse_data:
+  mongodb_data:
+  prometheus_data:
+  alertmanager_data:
+  grafana_data:
+
+networks:
+  clickstack: {}

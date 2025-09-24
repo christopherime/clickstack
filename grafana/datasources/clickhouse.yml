@@ -1,0 +1,29 @@
+---
+apiVersion: 1
+
+datasources:
+  - name: ClickHouse
+    type: grafana-clickhouse-datasource
+    access: proxy
+    url: http://clickhouse:8123
+    database: otel
+    basicAuth: false
+    isDefault: true
+    jsonData:
+      username: default
+      defaultDatabase: otel
+      defaultTable: otel_metrics_v2
+      timeout: 10
+      queryTimeout: 60
+      dialTimeout: 10
+      debug: false
+    secureJsonData:
+      password: ""
+
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: false
+    jsonData:
+      timeInterval: "15s"

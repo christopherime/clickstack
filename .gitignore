@@ -1,0 +1,121 @@
+# Golang specific
+bin/
+build/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+go.work.sum
+
+# Build and package directories
+dist/
+output/
+release/
+tmp/
+temp/
+!internal/*
+
+# Dependencies
+vendor/
+node_modules/
+
+# IDE and editor files
+# .idea/
+# .zed/
+# .vscode/
+# .junie/
+# .augment/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-workspace
+*.sublime-project
+.vs/
+*.iml
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+credentials/
+config/secrets/
+
+# Logs and databases
+*.log
+logs/
+*.db
+*.sqlite
+*.sqlite3
+dump.rdb
+
+# Test coverage and profiling
+coverage/
+*.cover
+*.prof
+.coverage
+htmlcov/
+
+# Operating System
+.DS_Store
+Thumbs.db
+desktop.ini
+*.lnk
+
+# Project specific
+Chart.lock
+.$*.drawio.bkp
+
+# Documentation artifacts
+_site/
+.docusaurus
+.cache/
+public/
+docs/_build/
+
+# Temporary files
+*.tmp
+*.bak
+
+# Container and deployment
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.rar
+deployment/secrets/
+k8s/secrets/
+
+# Local development
+.local/
+.dev/
+docker-compose.override.yml
+
+!Dockerfile.test
+
+reports/
+
+golangci-lint-report*
+gosec-report*
+
+benchmarks/
+
+archive/*
+data/*
+storage/*
+
+argus
+
+!docs/**/*.log

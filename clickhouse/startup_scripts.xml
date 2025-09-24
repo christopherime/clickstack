@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<clickhouse>
+    <startup_scripts>
+        <throw_on_error>true</throw_on_error>
+        <script>
+            <name>init_database</name>
+            <type>file</type>
+            <path>/etc/clickhouse-server/config.d/init.sql</path>
+        </script>
+    </startup_scripts>
+</clickhouse>

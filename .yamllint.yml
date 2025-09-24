@@ -1,0 +1,80 @@
+# yamllint configuration for HashiCorp Vault Infrastructure Project
+# https://yamllint.readthedocs.io/en/stable/configuration.html
+---
+extends: default
+
+rules:
+  # Line length
+  line-length:
+    max: 200
+    level: warning
+
+  # Indentation
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
+
+  # Comments
+  comments:
+    min-spaces-from-content: 1
+
+  # Comments indentation
+  comments-indentation: enable
+
+  # Document end
+  document-end:
+    present: false
+
+  # Empty lines
+  empty-lines:
+    max: 2
+    max-start: 0
+    max-end: 1
+
+  # Empty values
+  empty-values:
+    forbid-in-block-mappings: true
+    forbid-in-flow-mappings: true
+
+  # Hyphens
+  hyphens:
+    max-spaces-after: 1
+
+  # Key duplicates
+  key-duplicates: enable
+
+  # Key ordering
+  key-ordering: disable
+
+  # New line at end of file
+  new-line-at-end-of-file: enable
+
+  # Octal values
+  octal-values:
+    forbid-implicit-octal: true
+    forbid-explicit-octal: true
+
+  # Quoted strings
+  quoted-strings: disable
+
+  # Trailing spaces
+  trailing-spaces: enable
+
+  # Truthy values
+  truthy:
+    allowed-values: ["true", "false"]
+    check-keys: true
+
+# Ignore specific files
+ignore: |
+  .github/
+  .ansible/
+  .terraform/
+  node_modules/
+  venv/
+  .venv/
+  __pycache__/
+  *.log
+  *.tmp
+  *.temp
